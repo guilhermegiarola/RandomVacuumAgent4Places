@@ -57,21 +57,21 @@ class World {
 function reflexVacuumAgent(world) {
     if (world.floors[world.location].dirty) { return 'SUCK'; }
     else if (world.location == 0){
-		if(world.floors[1].dirty) { return 'RIGHT' }
+		if(Math.random() < 0.5) { return 'RIGHT' }
 		else { return 'DOWN' }
-	}
+    }
     else if (world.location == 1){
-		if(world.floors[0].dirty) { return 'LEFT' }
+		if(Math.random() < 0.5) { return 'LEFT' }
 		else { return 'DOWN' }
-	}
+    }
 	else if (world.location == 2){
-		if(world.floors[3].dirty){ return 'RIGHT' }
+		if(Math.random() < 0.5){ return 'RIGHT' }
 		else { return 'UP' }
-	}
+    }
 	else if (world.location == 3){
-		if(world.floors[2].dirty){ return 'LEFT' }
+		if(Math.random() < 0.5){ return 'LEFT' }
 		else { return 'UP' }
-	}
+    }
 }
 
 // Rules are defined in data, in a table indexed by [location][dirty]
