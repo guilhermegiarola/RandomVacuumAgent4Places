@@ -3,27 +3,34 @@
 class World {
     constructor(numFloors) {
         this.location = 0;
-        this.floors = [];
-        for (let i = 0; i < numFloors; i++) {
-            this.floors.push({dirty: false});
-        }
+		this.floors = [];
+		this.weights = [];
+		for (let i = 0; i < numFloors; i++) {
+			this.floors.push({dirty: false});
+			this.weights.push(0);
+		}
+		this.lastClean;
     }
 
     markFloorDirty(floorNumber) {
-        this.floors[floorNumber].dirty = true;
+		this.floors[floorNumber].dirty = true;
     }
 
     simulate(action) {
         switch(action) {
         case 'SUCK':
-	    this.floors[this.location].dirty = false;
-            break;
-        case 'LEFT':
+			this.floors[this.location].dirty = false;
+			this.lastClean = this.location;
+			this.weights[this.location] += 1;
+			break;
+		
+		case 'LEFT':
             if(this.location == 1){
 				this.location = 0;
 			} else if(this.location == 3){
 				this.location = 2;
 			}
+			if (this.weights[this.location] > 0){ this.weights[this.location] -= 1; }
             break;
         
 		case 'RIGHT':
@@ -32,6 +39,7 @@ class World {
 			} else if (this.location == 2){
 				this.location = 3;
 			}
+			if (this.weights[this.location] > 0){ this.weights[this.location] -= 1; }
             break;
         
 		case 'UP':
@@ -40,6 +48,7 @@ class World {
 			} else if (this.location == 3){
 				this.location = 1;
 			}
+			if (this.weights[this.location] > 0){ this.weights[this.location] -= 1; }
 			break;
 		case 'DOWN':
 			if(this.location == 0){
@@ -47,6 +56,25 @@ class World {
 			} else if (this.location == 1){
 				this.location = 3;
 			}
+			if (this.weights[this.location] > 0){ this.weights[this.location] -= 1; }
+			break;
+		case 'DIAG_DOWN':
+			if(this.location == 0){
+				this.location = 3;
+			} else if (this.location == 1){
+				this.location = 2;
+			}
+			if (this.weights[this.location] > 0){ this.weights[this.location] -= 1; }
+			break;
+
+		case 'DIAG_UP':
+			if(this.location == 2){
+				this.location = 1;
+			} else if (this.location == 3){
+				this.location = 0;
+			}
+			if (this.weights[this.location] > 0){ this.weights[this.location] -= 1; }
+			break;
 		}
         return action;
     }
@@ -55,22 +83,95 @@ class World {
 
 // Rules are defined in code
 function reflexVacuumAgent(world) {
-    if (world.floors[world.location].dirty) { return 'SUCK'; }
+	if (world.floors[world.location].dirty) { return 'SUCK' }
     else if (world.location == 0){
-		if(Math.random() < 0.5) { return 'RIGHT' }
-		else { return 'DOWN' }
-    }
+		
+		if(this.lastLocation == 1){
+			this.lastLocation = 0;
+			if(world.weights[3] > world.weights[2]){
+				return 'DIAG_DOWN'
+			} else { return 'DOWN' }
+
+		} else if(this.lastLocation == 2) { 
+			this.lastLocation = 0;
+
+			if(world.weights[3] > world.weights[1]){
+				return 'DIAG_DOWN'
+			} else { return 'RIGHT' }
+		
+		} else { 
+			this.lastLocation = 0;
+			
+			if(world.weights[1] > world.weights[2]){
+				return 'RIGHT'
+			} else { return 'DOWN' }
+		}
+	}
     else if (world.location == 1){
-		if(Math.random() < 0.5) { return 'LEFT' }
-		else { return 'DOWN' }
-    }
+		if(this.lastLocation == 3) { 
+			this.lastLocation = 1;
+
+			if(world.weights[2] > world.weights[0]) {
+				return 'DIAG_DOWN'
+			} else { return 'LEFT' }
+		
+		} else if (this.lastLocation == 0) { 
+			this.lastLocation = 1;
+			
+			if(world.weights[2] > world.weights[3]){
+				return 'DIAG_DOWN'
+			} else { return 'DOWN' }
+		} else {
+			this.lastLocation = 1;
+			
+			if(world.weights[0] > world.weights[3]){
+				return 'LEFT'
+			} else { return 'DOWN' }
+		}
+	}
 	else if (world.location == 2){
-		if(Math.random() < 0.5){ return 'RIGHT' }
-		else { return 'UP' }
+		if(this.lastLocation == 0) { 
+			this.lastLocation = 2;
+
+			if(world.weights[1] > world.weights[3]){
+				return 'DIAG_UP'
+			} else { return 'RIGHT' }
+		
+		} else if(this.lastLocation == 3) { 
+			this.lastLocation = 2;
+			
+			if(world.weights[1] > world.weights[0]){
+				return 'DIAG_UP'
+			} else { return 'UP' }
+		} else {
+			this.lastLocation = 2;
+			
+			if(world.weights[3] > world.weights[0]){
+				return 'RIGHT'
+			} else { return 'UP' }	
+		}
     }
 	else if (world.location == 3){
-		if(Math.random() < 0.5){ return 'LEFT' }
-		else { return 'UP' }
+		if(this.lastLocation == 1) { 
+			this.lastLocation = 3;
+
+			if(world.weights[0] > world.weights[2]){
+				return 'DIAG_UP'
+			} else { return 'LEFT' }
+		
+		} else if(this.lastLocation == 2) { 
+			this.lastLocation = 3;
+			
+			if(world.weights[0] > world.weights[1]){
+				return 'DIAG_UP'
+			} else { return 'UP' }
+		} else {
+			this.lastLocation = 3;
+			
+			if(world.weights[2] > world.weights[1]) {
+				return 'LEFT'
+			} else { return 'UP' }
+		}
     }
 }
 
